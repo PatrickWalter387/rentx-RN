@@ -1,13 +1,15 @@
 import React from 'react';
-import { useNavigation, NavigationProp, ParamListBase } from '@react-navigation/native';
+import { useNavigation, NavigationProp, ParamListBase, useRoute } from '@react-navigation/native';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { useTheme } from 'styled-components';
 import { Feather } from '@expo/vector-icons';
+import { StatusBar } from 'react-native';
 
 import { BackButton } from '../../components/BackButton';
 import { ImageSlider } from '../../components/ImageSlider';
 import { Accessory } from '../../components/Accessory';
 import { Button } from '../../components/Button';
+import { CarDTO } from '../../dtos/CarDTO';
 
 import SpeedSvg from '../../assets/speed.svg';
 import AccelerationSvg from '../../assets/acceleration.svg';
@@ -41,11 +43,18 @@ import {
     RentalPriceQuota,
     RentalPriceTotal
 } from './styles';
-import { StatusBar } from 'react-native';
+import { getAccessoryIcon } from '../../utils/getAccessoryIcon';
+
+interface Params {
+    car: CarDTO;
+}
 
 export function SchedulingDetails() {
     const theme = useTheme();
     const { navigate }: NavigationProp<ParamListBase> = useNavigation();
+
+    const route = useRoute();
+    const { car } = route.params as Params;
 
     function handleConfirm(){
         navigate('SchedulingComplete');
@@ -82,12 +91,11 @@ export function SchedulingDetails() {
                 </Details>
 
                 <Acessories>
-                    <Accessory name="300Km/h" icon={SpeedSvg} />
-                    <Accessory name="3.2s" icon={AccelerationSvg} />
-                    <Accessory name="800 HP" icon={ForceSvg} />
-                    <Accessory name="Gasolina" icon={GasolineSvg} />
-                    <Accessory name="Auto" icon={ExchangeSvg} />
-                    <Accessory name="2 pessoas" icon={PeopleSvg} />
+                    {
+                        car.accessories.map(item => (
+                            <Accessory name={item.name} icon={getAccessoryIcon(item.type)} key={item.id} />
+                        ))
+                    }
                 </Acessories>
 
                 <RentalPeriod>

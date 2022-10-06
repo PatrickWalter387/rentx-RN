@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigation, NavigationProp, ParamListBase } from '@react-navigation/native';
 
 import {
@@ -10,22 +10,22 @@ import {
 
 import Logo from '../../assets/logo.svg';
 import { CarCard } from '../../components/CarCard';
-
-const carData = {
-  brand: 'Porsche',
-    name: 'Panamera',
-    rent: {
-      period: 'Ao dia',
-      price: 340
-    },
-    thumbnail: 'https://assets.stickpng.com/images/580b585b2edbce24c47b2cae.png'
-}
+import { CarDTO } from '../../dtos/CarDTO';
+import api from '../../services/api';
 
 export function Home(){
+  const [carsData, setCarsData] = useState<CarDTO[]>([]);
   const { navigate }: NavigationProp<ParamListBase> = useNavigation();
 
-  function handleConfirm(){
-    navigate('CarDetails');
+  useEffect(() => {
+    (async function(){
+      const response = await api.get("/cars");
+      setCarsData(response.data);
+    })();
+  },[]);
+
+  function handleConfirm(car: CarDTO){
+    navigate('CarDetails', { car });
   }
 
   return (
@@ -35,11 +35,12 @@ export function Home(){
 
         <Total>Total de 12 carros</Total>
       </Header>
-
-      <Content>
-        <CarCard onPress={handleConfirm} />
-        <CarCard onPress={handleConfirm} />
-      </Content>
+      
+      <Content
+        data={carsData}
+        keyExtractor={item => item.id}
+        renderItem={({ item }) => <CarCard data={item} onPress={() => handleConfirm(item)} key={item.id} /> }
+      />
     </Container>
   );
 }

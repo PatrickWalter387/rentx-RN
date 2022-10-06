@@ -2,6 +2,8 @@ import React from 'react';
 import { TouchableOpacityProps } from 'react-native';
 
 import GasolineSVG from '../../assets/gasoline.svg';
+import { CarDTO } from '../../dtos/CarDTO';
+import { getAccessoryIcon } from '../../utils/getAccessoryIcon';
 
 import {
     Container,
@@ -15,26 +17,32 @@ import {
     CarImage
 } from './styles';
 
-export function CarCard({ ...rest } : TouchableOpacityProps){
-  return (
-    <Container {...rest}>
-        <Details>
-            <Brand>Audi</Brand>
-            <Name>RS 5 Coupé</Name>
-            
-            <Rent>
-                <Period>Ao dia</Period>
-                <About>
-                    <Price>R$ 120</Price>
-                    <GasolineSVG />
-                </About>
-            </Rent>
-        </Details>
+interface Props extends TouchableOpacityProps {
+    data: CarDTO;
+}
 
-        <CarImage 
-            source={{ uri: 'https://production.autoforce.com/uploads/version/profile_image/6737/comprar-tiptronic_13d79f3c1b.png' }} 
-            resizeMode='contain'
-        />
-    </Container>
-  );
+export function CarCard({ data, ...rest } : Props){
+    const MotorIcon = getAccessoryIcon(data.fuel_type);
+
+    return (
+        <Container {...rest}>
+            <Details>
+                <Brand>{data.brand}</Brand>
+                <Name>{data.name}</Name>
+                
+                <Rent>
+                    <About>
+                        <Period>{data.rent.period}</Period>
+                        <Price>R$ {data.rent.price}</Price>
+                    </About>
+                    <MotorIcon />
+                </Rent>
+            </Details>
+
+            <CarImage 
+                source={{ uri: data.thumbnail }} 
+                resizeMode='contain'
+            />
+        </Container>
+    );
 }

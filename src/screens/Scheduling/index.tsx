@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigation, NavigationProp, ParamListBase } from '@react-navigation/native';
 import { useTheme } from 'styled-components';
 import { BackButton } from '../../components/BackButton';
@@ -17,20 +17,41 @@ import {
     Footer
 } from './styles';
 import { Button } from '../../components/Button';
-import { Calendar } from '../../components/Calendar';
+import { Calendar, DayProps, generateInterval, MarkedDateProps } from '../../components/Calendar';
 
 export function Scheduling(){
     const theme = useTheme();
-    const { navigate }: NavigationProp<ParamListBase> = useNavigation();
+    const navigator : NavigationProp<ParamListBase> = useNavigation();
+
+    const [lastSelectedDate, setLastSelectedDate] = useState<DayProps>({} as DayProps)
+    const [markedDates, setMarkedDates] = useState<MarkedDateProps>({} as MarkedDateProps)
 
     function handleConfirm(){
-        navigate('SchedulingDetails');
+        navigator.navigate('SchedulingDetails');
+    }
+
+    function handleGoBack(){
+        navigator.goBack();
+    }
+
+    function handleSelectDate(date: DayProps) {
+        let start = !lastSelectedDate.timestamp ? date : lastSelectedDate;
+        let end = date;
+    
+        if(start.timestamp > end.timestamp) {
+            start = end;
+            end = start;
+        }
+    
+        setLastSelectedDate(end);
+        const interval = generateInterval(start, end);
+        setMarkedDates(interval);
     }
 
     return (
         <Container>
             <Header>
-                <BackButton onPress={() => {}} color={theme.colors.shape} />
+                <BackButton onPress={handleGoBack} color={theme.colors.shape} />
 
                 <Title>
                     Escolha uma {'\n'}
@@ -54,11 +75,14 @@ export function Scheduling(){
             </Header>
 
             <Content>
-                <Calendar />
+                <Calendar
+                    markedDates={markedDates}
+                    onDayPress={handleSelectDate}
+                />
             </Content>
 
             <Footer>
-                <Button title='Clique-me' onPress={handleConfirm} />
+                <Button title='Confirmar' onPress={handleConfirm} />
             </Footer>
         </Container>
     );

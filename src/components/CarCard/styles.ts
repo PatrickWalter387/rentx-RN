@@ -32,6 +32,9 @@ export const Name = styled.Text`
 
 export const Rent = styled.View`
     margin-top: 16px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
 `;
 
 export const Period = styled.Text`
@@ -42,8 +45,7 @@ export const Period = styled.Text`
 `;
 
 export const About = styled.View`
-    flex-direction: row;
-    justify-content: space-between;
+    margin-right: ${RFValue(30)}px;
 `;
 
 export const Price = styled.Text`
