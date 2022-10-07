@@ -2,6 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { StatusBar, FlatList } from 'react-native';
 import { useTheme } from 'styled-components';
+import { AntDesign } from '@expo/vector-icons';
 
 import { CarDTO } from '../../dtos/CarDTO';
 
@@ -16,6 +17,11 @@ import {
     Appointments,
     AppointmentsTitle,
     AppointmentsQuantity,
+    CarWrapper,
+    CarFooter,
+    CarFooterTitle,
+    CarFooterPeriod,
+    CarFooterDate
 } from './styles';
 
 import api from '../../services/api';
@@ -25,6 +31,8 @@ interface CarProps {
     id: number;
     user_id: number;
     car: CarDTO;
+    startDate: string;
+    endDate: string;
 }
 
 export function MyCars() {
@@ -82,7 +90,7 @@ export function MyCars() {
             <Content>
                 <Appointments>
                     <AppointmentsTitle>Agendamentos feitos</AppointmentsTitle>
-                    <AppointmentsQuantity>05</AppointmentsQuantity>
+                    <AppointmentsQuantity>{cars.length}</AppointmentsQuantity>
                 </Appointments>
 
                 <FlatList 
@@ -90,7 +98,22 @@ export function MyCars() {
                     keyExtractor={item => String(item.id)}
                     showsVerticalScrollIndicator={false}
                     renderItem={({ item }) => (
-                        <CarCard data={item.car} />
+                        <CarWrapper>
+                            <CarCard data={item.car} />
+                            <CarFooter>
+                                <CarFooterTitle>Período</CarFooterTitle>
+                                <CarFooterPeriod>
+                                    <CarFooterDate>{item.startDate}</CarFooterDate>
+                                    <AntDesign
+                                        name="arrowright"
+                                        size={20}
+                                        color={theme.colors.title}
+                                        style={{ marginHorizontal: 10 }}
+                                    />
+                                    <CarFooterDate>{item.endDate}</CarFooterDate>
+                                </CarFooterPeriod>
+                            </CarFooter>
+                        </CarWrapper>
                     )}
                 />
             </Content>
