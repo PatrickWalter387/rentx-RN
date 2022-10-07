@@ -84,7 +84,7 @@ export function CarDetails() {
                 <Accessories>
                     {
                         car.accessories.map(item => (
-                            <Accessory name={item.name} icon={getAccessoryIcon(item.type)} key={item.id} />
+                            <Accessory name={item.name} icon={getAccessoryIcon(item.type)} key={item.type} />
                         ))
                     }
                 </Accessories>

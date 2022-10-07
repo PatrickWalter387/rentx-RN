@@ -48,7 +48,7 @@ export function Home(){
       <Content
         data={carsData}
         keyExtractor={item => item.id}
-        renderItem={({ item }) => <CarCard data={item} onPress={() => handleConfirm(item)} key={item.id} /> }
+        renderItem={({ item }) => <CarCard data={item} onPress={() => handleConfirm(item)} /> }
       />
 
       <MyCarsButton onPress={handleOpenMyCars}>
