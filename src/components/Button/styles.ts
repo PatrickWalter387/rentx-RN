@@ -1,5 +1,5 @@
 import { TouchableOpacityProps } from "react-native";
-import styled from "styled-components/native";
+import styled, { css } from "styled-components/native";
 
 interface Props extends TouchableOpacityProps{
     color: string;
@@ -11,6 +11,8 @@ export const Container = styled.TouchableOpacity<Props>`
     align-items: center;
 
     background-color: ${({ theme, color }) => color ? color : theme.colors.main};
+
+    ${({ disabled }) => disabled && css`opacity: 0.5;`}
 `;
 
 export const Title = styled.Text`

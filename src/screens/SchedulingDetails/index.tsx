@@ -3,20 +3,14 @@ import { useNavigation, NavigationProp, ParamListBase, useRoute } from '@react-n
 import { RFValue } from 'react-native-responsive-fontsize';
 import { useTheme } from 'styled-components';
 import { Feather } from '@expo/vector-icons';
-import { StatusBar } from 'react-native';
+import { Alert, StatusBar } from 'react-native';
+import { format } from 'date-fns';
 
 import { BackButton } from '../../components/BackButton';
 import { ImageSlider } from '../../components/ImageSlider';
 import { Accessory } from '../../components/Accessory';
 import { Button } from '../../components/Button';
 import { CarDTO } from '../../dtos/CarDTO';
-
-import SpeedSvg from '../../assets/speed.svg';
-import AccelerationSvg from '../../assets/acceleration.svg';
-import ForceSvg from '../../assets/force.svg';
-import GasolineSvg from '../../assets/gasoline.svg';
-import ExchangeSvg from '../../assets/exchange.svg';
-import PeopleSvg from '../../assets/people.svg';
 
 import {
     Container, 
@@ -44,20 +38,44 @@ import {
     RentalPriceTotal
 } from './styles';
 import { getAccessoryIcon } from '../../utils/getAccessoryIcon';
+import { getPlatformDate } from '../../utils/getPlataformDate';
+import api from '../../services/api';
 
 interface Params {
     car: CarDTO;
+    dates: string[];
 }
 
 export function SchedulingDetails() {
     const theme = useTheme();
-    const { navigate }: NavigationProp<ParamListBase> = useNavigation();
+    const navigator : NavigationProp<ParamListBase> = useNavigation();
 
     const route = useRoute();
-    const { car } = route.params as Params;
+    const { car, dates } = route.params as Params;
 
-    function handleConfirm(){
-        navigate('SchedulingComplete');
+    async function handleConfirm(){
+        try {
+            const schedulesByCar = await api.get(`schedules_bycars/${car.id}`);
+      
+            const unavailable_dates = [
+                ...schedulesByCar.data.unavailable_dates,
+                ...dates
+            ]
+      
+            await api.put(`schedules_bycars/${car.id}`, {
+                id: car.id,
+                unavailable_dates
+            })
+      
+            navigator.navigate('SchedulingComplete');
+        } 
+        catch {
+            Alert.alert('Não foi possível confirmar o agendamento')
+        }
+    }
+
+    function handleGoBack(){
+        navigator.goBack();
     }
 
     return (
@@ -68,25 +86,25 @@ export function SchedulingDetails() {
                     translucent
                     backgroundColor="transparent"
                 />
-                <BackButton onPress={() => {}} />
+                <BackButton onPress={handleGoBack} />
             </Header>
 
             <CarImages>
                 <ImageSlider 
-                    imagesUrl={['https://freepngimg.com/thumb/audi/35227-5-audi-rs5-red.png']}
+                    imagesUrl={car.photos}
                 />
             </CarImages>
 
             <Content>
                 <Details>
                     <Description>
-                        <Brand>Lamborghini</Brand>
-                        <Name>Huracan</Name>
+                        <Brand>{car.brand}</Brand>
+                        <Name>{car.name}</Name>
                     </Description>
 
                     <Rent>
-                        <Period>Ao dia</Period>
-                        <Price>R$ 580</Price>
+                        <Period>{car.rent.period}</Period>
+                        <Price>R$ {car.rent.price}</Price>
                     </Rent>
                 </Details>
 
@@ -109,7 +127,7 @@ export function SchedulingDetails() {
 
                     <DateInfo>
                         <DateTitle>DE</DateTitle>
-                        <DateValue>18/06/2021</DateValue>
+                        <DateValue>{format(getPlatformDate(new Date(dates[0])), 'dd/MM/yyyy')}</DateValue>
                     </DateInfo>
 
                     <Feather 
@@ -120,21 +138,21 @@ export function SchedulingDetails() {
 
                     <DateInfo>
                         <DateTitle>ATÉ</DateTitle>
-                        <DateValue>20/06/2021</DateValue>
+                        <DateValue>{format(getPlatformDate(new Date(dates[dates.length-1])), 'dd/MM/yyyy')}</DateValue>
                     </DateInfo>
                 </RentalPeriod>
 
                 <RentalPrice>
                     <RentalPriceLabel>Total</RentalPriceLabel>
                     <RentalPriceDetails>
-                        <RentalPriceQuota>R$ 500 x3 diárias</RentalPriceQuota>
-                        <RentalPriceTotal>R$ 2.900</RentalPriceTotal>
+                        <RentalPriceQuota>R$ {car.rent.price} x{dates.length} diárias</RentalPriceQuota>
+                        <RentalPriceTotal>R$ {car.rent.price * dates.length}</RentalPriceTotal>
                     </RentalPriceDetails>
                 </RentalPrice>
             </Content>
 
             <Footer>
-                <Button title="Confirmar" onPress={handleConfirm} />
+                <Button title="Alugar agora" onPress={handleConfirm} color={theme.colors.success} />
             </Footer>
         </Container>
     );
