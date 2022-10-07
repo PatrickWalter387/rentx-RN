@@ -60,17 +60,22 @@ export function SchedulingDetails() {
             const unavailable_dates = [
                 ...schedulesByCar.data.unavailable_dates,
                 ...dates
-            ]
+            ];
       
+            await api.post(`schedules_byuser`, {
+                user_id: 1,
+                car
+            });
+
             await api.put(`schedules_bycars/${car.id}`, {
                 id: car.id,
                 unavailable_dates
-            })
+            });
       
             navigator.navigate('SchedulingComplete');
         } 
         catch {
-            Alert.alert('Não foi possível confirmar o agendamento')
+            Alert.alert('Não foi possível confirmar o agendamento');
         }
     }
 
