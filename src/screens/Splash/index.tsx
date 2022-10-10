@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, interpolate, runOnJS, Extrapolate } from 'react-native-reanimated';
-import { useNavigation, NavigationProp, ParamListBase } from '@react-navigation/native';
+import { useNavigation, NavigationProp, ParamListBase, CommonActions } from '@react-navigation/native';
 
 import BrandSvg from '../../assets/brand.svg';
 import LogoSvg from '../../assets/logo.svg';
@@ -37,7 +37,14 @@ export function Splash(){
     });
 
     function startApp() {
-        navigator.navigate('Home');
+        navigator.dispatch(
+            CommonActions.reset({
+                index: 1,
+                routes: [{ name: 'Home' }],
+            })
+        );    
+
+        //navigator.navigate('Home');
     }
 
     useEffect(() => {

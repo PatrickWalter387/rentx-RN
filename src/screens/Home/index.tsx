@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigation, NavigationProp, ParamListBase } from '@react-navigation/native';
+import { useNavigation, NavigationProp, ParamListBase, useFocusEffect, CommonActions } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import styled, { useTheme } from 'styled-components';
 import { GestureHandlerRootView, PanGestureHandler, TouchableOpacity } from 'react-native-gesture-handler';
-import { Text } from 'react-native';
+import { BackHandler } from 'react-native';
 
 import {
   Container,
@@ -61,6 +61,13 @@ export function Home(){
       setCarsData(response.data);
     })();
   },[]);
+
+  //Bloquea acao do botao caso necessario
+  //useFocusEffect(() => {
+  //  const backHandler = BackHandler.addEventListener('hardwareBackPress', () => true);
+  //
+  //  return backHandler.remove();
+  //});
 
   function handleConfirm(car: CarDTO){
     navigator.navigate('CarDetails', { car });
