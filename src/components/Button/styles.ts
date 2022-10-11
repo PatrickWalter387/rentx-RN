@@ -3,6 +3,11 @@ import styled, { css } from "styled-components/native";
 
 interface Props extends TouchableOpacityProps{
     color: string;
+    light: boolean;
+}
+
+interface TextProps{
+    light: boolean;
 }
 
 export const Container = styled.TouchableOpacity<Props>`
@@ -15,7 +20,7 @@ export const Container = styled.TouchableOpacity<Props>`
     ${({ disabled }) => disabled && css`opacity: 0.5;`}
 `;
 
-export const Title = styled.Text`
+export const Title = styled.Text<TextProps>`
     font-family: ${({ theme }) => theme.fonts.secondary_500};
-    color: ${({ theme }) => theme.colors.background_secondary};
+    color: ${({ theme, light }) => light ? theme.colors.header : theme.colors.background_secondary};
 `;

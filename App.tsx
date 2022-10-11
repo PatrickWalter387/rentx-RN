@@ -27,10 +27,10 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-    <ThemeProvider theme={theme}>
-      <StatusBar backgroundColor='transparent' barStyle={'light-content'} translucent />
-      <Routes />
-    </ThemeProvider>
+      <ThemeProvider theme={theme}>
+        <StatusBar backgroundColor='transparent' barStyle={'light-content'} translucent />
+        <Routes />
+      </ThemeProvider>
     </GestureHandlerRootView>
   );
 }
