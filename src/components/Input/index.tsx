@@ -26,7 +26,7 @@ export function Input({ value, iconName, ...rest } : Props){
     }
 
     return (
-        <Container isFocused={isFocused}>
+        <Container style={{ borderBottomWidth: isFocused ? 2 : 0, borderBottomColor: theme.colors.main }}>
             <IconContainer>
                 <Feather 
                     name={iconName}

@@ -5,6 +5,8 @@ import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { PasswordInput } from '../../components/PasswordInput';
 
+import * as Yup from 'yup';
+
 import {
     Container,
     Header,
@@ -18,6 +20,19 @@ export function SignIn(){
     const theme = useTheme();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+
+    async function handleSignIn(){
+        const schema = Yup.object().shape({
+            email: Yup.string()
+                .required()
+                .email(),
+            
+            password: Yup.string()
+                .required()
+        });
+
+        await schema.validate({ email, password });
+    }
 
     return (
         <Container>
@@ -49,7 +64,7 @@ export function SignIn(){
             </Content>
 
             <Footer>
-                <Button title='Login' />
+                <Button title='Login' onPress={handleSignIn} />
                 <Button style={{ marginTop: 8 }} title='Criar conta gratuita' color={theme.colors.background_secondary} light />
             </Footer>
         </Container>
