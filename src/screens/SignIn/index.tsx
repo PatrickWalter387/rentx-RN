@@ -6,6 +6,7 @@ import { Input } from '../../components/Input';
 import { PasswordInput } from '../../components/PasswordInput';
 
 import * as Yup from 'yup';
+import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/native';
 
 import {
     Container,
@@ -20,6 +21,12 @@ export function SignIn(){
     const theme = useTheme();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+
+    const navigator : NavigationProp<ParamListBase> = useNavigation();
+
+    function handleRegister() {
+        navigator.navigate('SignUpFirstStep');
+    }
 
     async function handleSignIn(){
         const schema = Yup.object().shape({
@@ -65,7 +72,7 @@ export function SignIn(){
 
             <Footer>
                 <Button title='Login' onPress={handleSignIn} />
-                <Button style={{ marginTop: 8 }} title='Criar conta gratuita' color={theme.colors.background_secondary} light />
+                <Button style={{ marginTop: 8 }} title='Criar conta gratuita' color={theme.colors.background_secondary} light onPress={handleRegister} />
             </Footer>
         </Container>
     );

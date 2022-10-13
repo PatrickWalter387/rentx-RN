@@ -4,9 +4,9 @@ import { FlatList, ViewToken } from 'react-native';
 import {
   Container,
   ImageIndexes,
-  ImageIndex,
   CarImageWrapper,
-  CarImage
+  CarImage,
+  SliderBullet
 } from './styles';
 
 interface Props {
@@ -30,7 +30,7 @@ export function ImageSlider({ imagesUrl }: Props) {
             <ImageIndexes>
                 {
                     imagesUrl.map((_, index) => (
-                        <ImageIndex active={index === imageVisibleIndex} key={index} />
+                        <SliderBullet  active={index === imageVisibleIndex} key={index} isFirst={index === 0} />
                     ))
                 }
             </ImageIndexes>

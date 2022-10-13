@@ -11,11 +11,6 @@ export const Container = styled.ScrollView.attrs({
     padding: 0 24px;
 `;
 
-/*export const Container = styled.View`
-    margin-top: ${getStatusBarHeight()}px;
-    padding: 0 24px;
-`;*/
-
 export const Header = styled.View`
     margin-top: 115px;
 `;
