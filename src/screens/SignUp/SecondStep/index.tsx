@@ -5,6 +5,7 @@ import { useTheme } from 'styled-components';
 import * as Yup from 'yup';
 
 import { BackButton } from '../../../components/BackButton';
+import api from '../../../services/api';
 
 import {
     ConfirmNewPasswordInput,
@@ -60,6 +61,13 @@ export function SecondStep() {
             const data = { newPassword, newPasswordConfirmation };
             await schema.validate(data, { abortEarly: false });
 
+            await api.post('/users', {
+                name: user.name,
+                email: user.email,
+                driver_license: user.driverLicense,
+                password: newPassword     
+            });
+
             navigation.navigate('Confirmation', {
                 title: 'Conta criada!',
                 screenToNavigate: 'SignIn',
@@ -70,7 +78,7 @@ export function SecondStep() {
             if (error instanceof Yup.ValidationError) {
                 return Alert.alert('Verifique os dados', error.errors.join('\n'));
             }
-
+            
             return Alert.alert('Erro na autenticação', 'Ocorreu um erro ao fazer login, verifique as credenciais.');
         }
     }
