@@ -1,6 +1,6 @@
 import React from 'react';
 import { useWindowDimensions } from 'react-native';
-import { useNavigation, NavigationProp, ParamListBase } from '@react-navigation/native';
+import { useNavigation, NavigationProp, ParamListBase, useRoute } from '@react-navigation/native';
 
 import BackgroundLogoSvg from '../../assets/logo_background_gray.svg';
 import DoneSvg from '../../assets/done.svg';
@@ -16,12 +16,24 @@ import {
 } from './styles';
 import { RFValue } from 'react-native-responsive-fontsize';
 
-export function SchedulingComplete(){
+interface Params {
+    title: string;
+    message: string;
+    screenToNavigate: string;
+}
+
+export function Confirmation(){
     const { width } = useWindowDimensions();
-    const { navigate }: NavigationProp<ParamListBase> = useNavigation();
+    const  navigator : NavigationProp<ParamListBase> = useNavigation();
+ 
+    const route = useRoute();
+    const { title, message, screenToNavigate } = route.params as Params;
 
     function handleConfirm(){
-        navigate('Home');
+        navigator.reset({
+            index: 0,
+            routes: [{ name: screenToNavigate }]
+        });
     }
 
     return (
@@ -31,12 +43,8 @@ export function SchedulingComplete(){
             <Content>
                 <DoneSvg width={RFValue(100)} height={RFValue(100)}  />
                 
-                <Title>Carro alugado!</Title>
-                <Description>
-                    Agora você só precisa ir {'\n'}
-                    até a concessionária da RENTX {'\n'}
-                    pegar o seu automóvel.
-                </Description>
+                <Title>{title}</Title>
+                <Description>{message}</Description>
             </Content>
 
             <Footer>

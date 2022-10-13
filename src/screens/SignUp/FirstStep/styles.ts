@@ -74,7 +74,7 @@ export const NameInput = styled(Input)`
 export const EmailInput = styled(Input)`
 `;
 
-export const DriversLicenseInput = styled(Input)`
+export const DriverLicenseInput = styled(Input)`
 `;
 
   

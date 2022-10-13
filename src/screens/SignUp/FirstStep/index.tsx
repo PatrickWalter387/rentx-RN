@@ -1,6 +1,8 @@
 import { ParamListBase, useNavigation, NavigationProp } from '@react-navigation/native';
-import React from 'react';
-import { KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import * as Yup from 'yup';
+
 import { BackButton } from '../../../components/BackButton';
 
 import {
@@ -14,7 +16,7 @@ import {
     SignUpSteps,
     SubTitle,
     Title,
-    DriversLicenseInput,
+    DriverLicenseInput,
     EmailInput,
     NameInput,
     ScrollableContainer,
@@ -22,15 +24,43 @@ import {
 
 export function FirstStep() {
     const navigator : NavigationProp<ParamListBase> = useNavigation();
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [driverLicense, setDriverLicense] = useState('');
+
+    async function handleGoToNextStep() {
+        try {
+            const schema = Yup.object().shape({
+                name: Yup
+                    .string()
+                    .required('Nome é obrigatório'),
+                email: Yup
+                    .string()
+                    .required('E-mail obrigatório')
+                    .email('Digite um e-mail válido'),
+                driverLicense: Yup
+                    .string()
+                    .required('CNH é obrigatória')
+            });
+
+            const data = { name, email, driverLicense };
+            await schema.validate(data, { abortEarly: false });
+
+            navigator.navigate('SignUpSecondStep', { user: data });
+        } 
+        catch (error) {
+            if (error instanceof Yup.ValidationError) {
+                return Alert.alert('Verifique os dados', error.errors.join('\n'));
+            }
+
+            return Alert.alert('Erro na autenticação', 'Ocorreu um erro ao fazer login, verifique as credenciais.');
+        }
+    }
 
     function handleGoBack() {
         if (navigator.canGoBack()) {
             navigator.goBack();
         }
-    }
-
-    function handleGoToNextStep() {
-        navigator.navigate('SignUpSecondStep');
     }
 
     return (
@@ -69,8 +99,8 @@ export function FirstStep() {
                             iconName="user"
                             placeholder="Nome"
                             autoCorrect={false}
-                            // value={name}
-                            // onChangeText={setName}
+                            value={name}
+                            onChangeText={setName}
                         />
 
                         <EmailInput
@@ -79,16 +109,16 @@ export function FirstStep() {
                             keyboardType="email-address"
                             autoCorrect={false}
                             autoCapitalize="none"
-                            // value={email}
-                            // onChangeText={setEmail}
+                            value={email}
+                            onChangeText={setEmail}
                         />
 
-                        <DriversLicenseInput 
+                        <DriverLicenseInput 
                             iconName="credit-card"
                             placeholder="CNH"
-                            // keyboardType="numeric"
-                            // value={driversLicense}
-                            // onChangeText={setDriversLicense}
+                            keyboardType="numeric"
+                            value={driverLicense}
+                            onChangeText={setDriverLicense}
                         />
 
                         <NextStepButton

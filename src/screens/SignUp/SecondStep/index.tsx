@@ -1,32 +1,77 @@
-import { useNavigation } from '@react-navigation/native';
-import React from 'react';
-import { KeyboardAvoidingView, Platform } from 'react-native';
+import { NavigationProp, ParamListBase, useNavigation, useRoute } from '@react-navigation/native';
+import React, { useState } from 'react';
+import { KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { useTheme } from 'styled-components';
+import * as Yup from 'yup';
+
 import { BackButton } from '../../../components/BackButton';
 
 import {
-ConfirmNewPasswordInput,
-Container,
-FinishRegisterButton,
-Form,
-FormTitle,
-Header,
-NewPasswordInput,
-ScrollableContainer,
-SignUpFirstStep,
-SignUpSecondStep,
-SignUpSteps,
-SubTitle,
-Title
+    ConfirmNewPasswordInput,
+    Container,
+    FinishRegisterButton,
+    Form,
+    FormTitle,
+    Header,
+    NewPasswordInput,
+    ScrollableContainer,
+    SignUpFirstStep,
+    SignUpSecondStep,
+    SignUpSteps,
+    SubTitle,
+    Title
 } from './styles';
 
+interface Params {
+    user: {
+        name: string;
+        email: string;
+        driverLicense: string;
+    }
+}
+
 export function SecondStep() {
-    const navigation = useNavigation();
+    const navigation : NavigationProp<ParamListBase> = useNavigation();
     const theme = useTheme();
+    const route = useRoute();
+
+    const [newPassword, setNewPassword] = useState('');
+    const [newPasswordConfirmation, setNewPasswordConfirmation] = useState('');
+    const { user } = route.params as Params;
 
     function handleGoBack() {
         if (navigation.canGoBack()) {
             navigation.goBack();
+        }
+    }
+
+    async function handleFinishRegister() {
+        try {
+            const schema = Yup.object().shape({
+                newPassword: Yup
+                    .string()
+                    .required('Senha é obrigatória'),
+                newPasswordConfirmation: Yup
+                    .string()
+                    .required('Confirmação de senha é obrigatória')
+                    .equals([Yup.ref('newPassword')], 'A confirmação de senha precisa ser igual à senha')
+            })
+
+            const data = { newPassword, newPasswordConfirmation };
+            await schema.validate(data, { abortEarly: false });
+
+            navigation.navigate('Confirmation', {
+                title: 'Conta criada!',
+                screenToNavigate: 'SignIn',
+                message: `Agora é só fazer login\ne aproveitar.`
+            });
+        } 
+        catch (error) {
+            if (error instanceof Yup.ValidationError) {
+                return Alert.alert('Verifique os dados', error.errors.join('\n'));
+            }
+
+            return Alert.alert('Erro na autenticação', 'Ocorreu um erro ao fazer login, verifique as credenciais.');
         }
     }
 
@@ -66,8 +111,8 @@ export function SecondStep() {
                             placeholder="Senha"
                             autoCorrect={false}
                             autoCapitalize="none"
-                            // value={password}
-                            // onChangeText={setPassword}
+                            value={newPassword}
+                            onChangeText={setNewPassword}
                         />
 
                         <ConfirmNewPasswordInput
@@ -75,15 +120,15 @@ export function SecondStep() {
                             placeholder="Repetir Senha"
                             autoCorrect={false}
                             autoCapitalize="none"
-                            // value={password}
-                            // onChangeText={setPassword}
+                            value={newPasswordConfirmation}
+                            onChangeText={setNewPasswordConfirmation}
                         />
 
                         <FinishRegisterButton
                             title="Cadastrar"
                             style={{ marginTop: 15 }}
                             color={theme.colors.success}
-                            onPress={() => {}}
+                            onPress={handleFinishRegister}
                         />
                     </Form>
                 </ScrollableContainer>
