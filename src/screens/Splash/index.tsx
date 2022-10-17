@@ -40,11 +40,11 @@ export function Splash(){
         navigator.dispatch(
             CommonActions.reset({
                 index: 1,
-                routes: [{ name: 'Home' }],
+                routes: [{ name: 'SignIn' }],
             })
-        );    
+        );
 
-        //navigator.navigate('Home');
+        //navigator.navigate('SignIn');
     }
 
     useEffect(() => {
