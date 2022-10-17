@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from 'styled-components';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/native';
@@ -29,13 +30,31 @@ import { useAuth } from '../../hooks/auth';
 
 export function Profile() {
     const theme = useTheme();
+    const { user, signOut } = useAuth();
+
     const navigation : NavigationProp<ParamListBase> = useNavigation();
 
     const [option, setOption] = useState<'dataEdit' | 'passwordEdit'>('dataEdit');
-    const { user } = useAuth();
+    const [avatar, setAvatar] = useState(user.avatar);
+    const [name, setName] = useState(user.name);
+    const [driverLicense, setDriverLicense] = useState(user.driver_license);
 
     function handleBack() {
         navigation.goBack()
+    }
+
+    async function handleAvatarSelect(){
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 4],
+            quality: 1, //0 menor qualidade possivel. 
+        });
+
+        if(result.cancelled)
+            return;
+
+        setAvatar(result.uri);
     }
 
     function handleOptionChange(optionSelected: 'dataEdit' | 'passwordEdit') {
@@ -57,7 +76,7 @@ export function Profile() {
                                 onPress={handleBack}
                             />
                             <HeaderTitle>Editar Perfil</HeaderTitle>
-                            <LogoutButton onPress={() => {}}>
+                            <LogoutButton onPress={signOut}>
                                 <Feather
                                     name='power'
                                     size={24}
@@ -67,8 +86,8 @@ export function Profile() {
                         </HeaderTop>
 
                         <PhotoContainer>
-                            {!!true && <Photo source={{ uri: 'https://avatars.githubusercontent.com/u/46614552?v=4' }} />}
-                            <PhotoButton onPress={() => {}}>
+                            {!!avatar && <Photo source={{ uri: avatar }} />}
+                            <PhotoButton onPress={handleAvatarSelect}>
                                 <Feather
                                     name='camera'
                                     size={24}
@@ -103,7 +122,7 @@ export function Profile() {
                                         placeholder='Nome'
                                         autoCorrect={false}
                                         defaultValue={user.name}
-                                        //onChangeText={setName}
+                                        onChangeText={setName}
                                     />
                                     <Input
                                         iconName='mail'
@@ -111,7 +130,7 @@ export function Profile() {
                                         editable={false}
                                         autoCorrect={false}
                                         defaultValue={user.email}
-                                        //onChangeText={setDriverLicense}
+                                        onChangeText={setDriverLicense}
                                     />
                                     <Input
                                         iconName='credit-card'

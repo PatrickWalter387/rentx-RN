@@ -26,6 +26,7 @@ interface SignInCredentials {
 interface IAuthContextData {
     user: User;
     signIn: (credentials : SignInCredentials) => Promise<void>;
+    signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext({} as IAuthContextData);
@@ -44,20 +45,37 @@ function AuthProvider({ children } : Props) {
         
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         
-            const userCollection = database.get<ModelUser>('users')
+            const userCollection = database.get<ModelUser>('users');
         
             await database.write(async () => {
-                await userCollection.create(( newUser ) => {
+                const dataUser = await userCollection.create(( newUser ) => {
                     newUser.user_id = user.id,
                     newUser.name = user.name,
                     newUser.email = user.email,
                     newUser.driver_license = user.driver_license,
                     newUser.avatar = user.avatar,
                     newUser.token = token
-                })
+                });
+
+                const userToSave = dataUser._raw as unknown as User;
+                setUser(userToSave);
             });
         
-            setUser({ ...user, token  });
+        } 
+        catch (error: any) {
+            throw new Error(error)
+        }
+    }
+
+    async function signOut(){
+        try {
+            const userCollection = database.get<ModelUser>('users');
+            await database.write(async () => {
+                const userSelected = await userCollection.find(user.id);
+                await userSelected.destroyPermanently();
+            });
+
+            setUser({} as User);
         } 
         catch (error: any) {
             throw new Error(error)
@@ -73,7 +91,6 @@ function AuthProvider({ children } : Props) {
                 const userData = response[0]._raw as unknown as User;
                 api.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
                 setUser(userData);
-                console.log(userData);
             }
         })();
 
@@ -81,7 +98,7 @@ function AuthProvider({ children } : Props) {
     }, [])
 
     return (
-        <AuthContext.Provider value={{ signIn, user }}>
+        <AuthContext.Provider value={{ signIn, signOut, user }}>
             {children}
         </AuthContext.Provider>
     );
