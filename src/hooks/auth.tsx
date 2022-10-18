@@ -27,6 +27,7 @@ interface IAuthContextData {
     user: User;
     signIn: (credentials : SignInCredentials) => Promise<void>;
     signOut: () => Promise<void>;
+    updateUser: (userp : User) => Promise<void>;
 }
 
 const AuthContext = createContext({} as IAuthContextData);
@@ -82,6 +83,25 @@ function AuthProvider({ children } : Props) {
         }
     }
 
+    async function updateUser(userp: User){
+        try {
+            const userCollection = database.get<ModelUser>('users');
+            await database.write(async () => {
+                const userSelected = await userCollection.find(user.id);
+                await userSelected.update((userData) => {
+                    userData.name = userp.name;
+                    userData.driver_license = userp.driver_license;
+                    userData.avatar = userp.avatar;
+                }); 
+            });
+
+            setUser(userp);
+        } 
+        catch (error: any) {
+            throw new Error(error)
+        }
+    }
+
     useEffect(() => {
         (async function loadUserData(){
             const userCollection = database.get('users');
@@ -98,7 +118,7 @@ function AuthProvider({ children } : Props) {
     }, [])
 
     return (
-        <AuthContext.Provider value={{ signIn, signOut, user }}>
+        <AuthContext.Provider value={{ signIn, signOut, updateUser, user }}>
             {children}
         </AuthContext.Provider>
     );

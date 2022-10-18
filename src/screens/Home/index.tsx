@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, { useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import styled, { useTheme } from 'styled-components';
 import { GestureHandlerRootView, PanGestureHandler, TouchableOpacity } from 'react-native-gesture-handler';
-import { BackHandler } from 'react-native';
+import { Alert, BackHandler } from 'react-native';
 
 import {
   Container,
@@ -19,12 +19,14 @@ import { CarCard } from '../../components/CarCard';
 import { CarDTO } from '../../dtos/CarDTO';
 import api from '../../services/api';
 import { RFValue } from 'react-native-responsive-fontsize';
+import { useNetInfo } from '@react-native-community/netinfo';
 
 const ButtonAnimated = Animated.createAnimatedComponent(TouchableOpacity);
 
 export function Home(){
   const [carsData, setCarsData] = useState<CarDTO[]>([]);
   const navigator : NavigationProp<ParamListBase> = useNavigation();
+  const netInfo = useNetInfo();
 
   const theme = useTheme();
 
@@ -61,6 +63,13 @@ export function Home(){
       setCarsData(response.data);
     })();
   },[]);
+
+  useEffect(() => {
+    if(netInfo.isConnected)
+      Alert.alert('Você está online!');
+    else
+      Alert.alert('Você está offline!');
+  }, [netInfo.isConnected]);
 
   //Bloquea acao do botao caso necessario
   //useFocusEffect(() => {

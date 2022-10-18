@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from 'styled-components';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/native';
+import * as Yup from 'yup';
 
 import { BackButton } from '../../components/BackButton';
 import { Input } from '../../components/Input';
@@ -30,7 +31,7 @@ import { useAuth } from '../../hooks/auth';
 
 export function Profile() {
     const theme = useTheme();
-    const { user, signOut } = useAuth();
+    const { user, signOut, updateUser } = useAuth();
 
     const navigation : NavigationProp<ParamListBase> = useNavigation();
 
@@ -41,6 +42,19 @@ export function Profile() {
 
     function handleBack() {
         navigation.goBack()
+    }
+
+    function handleSignOut() {
+        Alert.alert('Deseja mesmo sair?', 'Será necessário conexão com a internet para fazer login novamente!', [
+            {
+                text: 'Cancelar',
+                onPress: () => {}
+            },
+            {
+                text: 'Confirmar',
+                onPress: () => signOut()
+            }
+        ])
     }
 
     async function handleAvatarSelect(){
@@ -65,6 +79,35 @@ export function Profile() {
         }
     }
 
+    async function handleUpdateUser(){
+        const schema = Yup.object().shape({
+            driverLicense: Yup.string().required('CNH é obrigatório!'),
+            name: Yup.string().required('Nome é obrigatório')
+        });
+
+        try{
+            await schema.validate({ name, driverLicense });
+            await updateUser({
+                id: user.id,
+                user_id: user.user_id,
+                email: user.email,
+                name,
+                driver_license: user.driver_license,
+                avatar,
+                token: user.token
+            });
+        
+            Alert.alert('Perfil atualizado');
+        }
+        catch(error){
+            if(error instanceof Yup.ValidationError)
+                return Alert.alert('Verifique os campos', error.message);
+
+            console.error(error);
+            Alert.alert('Não foi possivel atualizar o perfil!');
+        }
+    }
+
     return (
         <KeyboardAvoidingView behavior='position' enabled>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -76,7 +119,7 @@ export function Profile() {
                                 onPress={handleBack}
                             />
                             <HeaderTitle>Editar Perfil</HeaderTitle>
-                            <LogoutButton onPress={signOut}>
+                            <LogoutButton onPress={handleSignOut}>
                                 <Feather
                                     name='power'
                                     size={24}
@@ -158,7 +201,7 @@ export function Profile() {
                         }
                         <Button
                             title='Salvar alterações'
-                            onPress={() => {}}
+                            onPress={handleUpdateUser}
                         />
                     </Content>
                 </Container>
