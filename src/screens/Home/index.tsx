@@ -18,8 +18,11 @@ import Logo from '../../assets/logo.svg';
 import { CarCard } from '../../components/CarCard';
 import { CarDTO } from '../../dtos/CarDTO';
 import api from '../../services/api';
+import { database } from '../../database';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { useNetInfo } from '@react-native-community/netinfo';
+import { synchronize } from '@nozbe/watermelondb/sync';
+import { Car as ModelCar } from '../../database/models/Car';
 
 const ButtonAnimated = Animated.createAnimatedComponent(TouchableOpacity);
 
@@ -59,17 +62,12 @@ export function Home(){
 
   useEffect(() => {
     (async function(){
-      const response = await api.get("/cars");
-      setCarsData(response.data);
+      const carCollection = database.get<ModelCar>('cars');
+      const cars = await carCollection.query().fetch();
+      const carsDTO = cars.map(car => car._raw as unknown as CarDTO);
+      setCarsData(carsDTO);
     })();
   },[]);
-
-  useEffect(() => {
-    if(netInfo.isConnected)
-      Alert.alert('Você está online!');
-    else
-      Alert.alert('Você está offline!');
-  }, [netInfo.isConnected]);
 
   //Bloquea acao do botao caso necessario
   //useFocusEffect(() => {
@@ -78,13 +76,36 @@ export function Home(){
   //  return backHandler.remove();
   //});
 
-  function handleConfirm(car: CarDTO){
+  function handleConfirm(car: CarDTO) {
     navigator.navigate('CarDetails', { car });
   }
 
   function handleOpenMyCars() {
     navigator.navigate('MyCars')
   }
+
+  async function offlineSyncronize() {
+    await synchronize({
+        database,
+        pullChanges: async ({ lastPulledAt }) => {
+          const response = await api
+            .get(`cars/sync/pull?lastPulledVersion=${lastPulledAt || 0}`)
+
+          const { changes, latestVersion } = response.data
+          return { changes, timestamp: latestVersion }
+        },
+        pushChanges: async ({ changes }) => {
+          const user = changes.users;
+          await api.post('/users/sync', user);
+        }
+    })
+  }
+  
+  useEffect(() => {
+    if (netInfo.isConnected === true) {
+      offlineSyncronize();
+    }
+  }, [netInfo.isConnected])
 
   return (
       <Container>

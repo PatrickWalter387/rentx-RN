@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { StatusBar, FlatList } from 'react-native';
 import { useTheme } from 'styled-components';
@@ -26,13 +26,14 @@ import {
 
 import api from '../../services/api';
 import { CarCard } from '../../components/CarCard';
+import { format, parseISO } from 'date-fns';
 
 interface CarProps {
     id: number;
     user_id: number;
     car: CarDTO;
-    startDate: string;
-    endDate: string;
+    start_date: string;
+    end_date: string;
 }
 
 export function MyCars() {
@@ -48,11 +49,19 @@ export function MyCars() {
     }
     
 
-    useEffect(() => {
+    useFocusEffect(() => {
         (async function fetchCars() {
             try {
-                const response = await api.get('schedules_byuser?user_id=1');
-                setCars(response.data);
+                const response = await api.get('/rentals');
+                const dataFormatted = response.data.map((data: CarProps) => {
+                    return {
+                        id: data.id,
+                        car: data.car,
+                        start_date: format(parseISO(data.start_date), 'dd/MM/yyyy'),
+                        end_date: format(parseISO(data.end_date), 'dd/MM/yyyy'),
+                    }
+                });
+                setCars(dataFormatted);
             } 
             catch (error) {
                 console.log(error);
@@ -61,7 +70,7 @@ export function MyCars() {
                 setLoading(false);
             }
         })();
-    }, []);
+    });
 
     return (
         <Container>
@@ -103,14 +112,14 @@ export function MyCars() {
                             <CarFooter>
                                 <CarFooterTitle>Período</CarFooterTitle>
                                 <CarFooterPeriod>
-                                    <CarFooterDate>{item.startDate}</CarFooterDate>
+                                    <CarFooterDate>{item.start_date}</CarFooterDate>
                                     <AntDesign
                                         name="arrowright"
                                         size={20}
                                         color={theme.colors.title}
                                         style={{ marginHorizontal: 10 }}
                                     />
-                                    <CarFooterDate>{item.endDate}</CarFooterDate>
+                                    <CarFooterDate>{item.end_date}</CarFooterDate>
                                 </CarFooterPeriod>
                             </CarFooter>
                         </CarWrapper>

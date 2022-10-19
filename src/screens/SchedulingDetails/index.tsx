@@ -40,6 +40,7 @@ import {
 import { getAccessoryIcon } from '../../utils/getAccessoryIcon';
 import { getPlatformDate } from '../../utils/getPlataformDate';
 import api from '../../services/api';
+import { useAuth } from '../../hooks/auth';
 
 interface Params {
     car: CarDTO;
@@ -49,38 +50,29 @@ interface Params {
 export function SchedulingDetails() {
     const theme = useTheme();
     const navigator : NavigationProp<ParamListBase> = useNavigation();
+    const { user } = useAuth()
 
     const route = useRoute();
     const { car, dates } = route.params as Params;
 
     async function handleConfirm(){
         try {
-            const schedulesByCar = await api.get(`schedules_bycars/${car.id}`);
-      
-            const unavailable_dates = [
-                ...schedulesByCar.data.unavailable_dates,
-                ...dates
-            ];
-      
-            await api.post(`schedules_byuser`, {
-                user_id: 1,
-                car,
-                startDate: format(getPlatformDate(new Date(dates[0])), 'dd/MM/yyyy'),
-                endDate: format(getPlatformDate(new Date(dates[dates.length - 1])), 'dd/MM/yyyy'),
-            });
+            await api.post('rentals', {      
+                user_id: user.id,
+                car_id: car.id,
+                start_date: new Date(dates[0]),
+                end_date: new Date(dates[dates.length - 1]),
+                total: Number(dates.length * car.price)
+            })
 
-            await api.put(`schedules_bycars/${car.id}`, {
-                id: car.id,
-                unavailable_dates
-            });
-      
             navigator.navigate('Confirmation', {
                 title: 'Carro alugado!',
                 screenToNavigate: 'Home',
                 message: `Agora você só precisa ir\naté a concessionária da RENTX\npegar o seu automóvel.`
             });
         } 
-        catch {
+        catch(err) {
+            console.error(err);
             Alert.alert('Não foi possível confirmar o agendamento');
         }
     }
